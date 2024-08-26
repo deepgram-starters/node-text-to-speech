@@ -3,20 +3,28 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter");
 
 /* Global styles */
-html {
-  background: #101014;
-  color: #fff;
-  font-family: Inter, sans-serif;
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #101014; /* Add this line to set the background color */
+  margin: 0; /* Add this to remove any default margin */
 }
 
 /* Main content */
 main {
+  flex: 1;
   margin-left: auto;
   margin-right: auto;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  max-width: 1400px;
+  max-width: 600px;
   gap: 1rem;
   padding: 1.5rem;
 }
@@ -31,12 +39,7 @@ main {
 .grid-container {
   display: grid;
   gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .grid-container {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  width: 100%;
 }
 
 /* Text-to-speech section */
@@ -44,17 +47,19 @@ main {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
 }
 
 /* Button container */
 .button-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 /* Button icon */
 .button-icon {
-  color: #00dda2;
+  color: #ff3366;
   font-size: 1.5rem;
 }
 
@@ -77,8 +82,8 @@ main {
 
 /* Button styling */
 button {
-  background: linear-gradient(#000, #000) padding-box,
-    linear-gradient(90deg, #201cff -91.5%, #13ef95 80.05%) border-box;
+  background: linear-gradient(#101014, #101014) padding-box,
+    linear-gradient(90deg, #ff3366 -91.5%, #ff6b6b 80.05%) border-box;
   height: 48px;
   width: 113px;
   border: 1px solid transparent;
@@ -92,9 +97,10 @@ button {
   font-weight: 800;
 }
 
-/* Dropdown select */
-select {
-  height: 54px;
+/* Dropdown select and Textarea */
+select, textarea {
+  width: 100%;
+  box-sizing: border-box;
   border-radius: 4px;
   border-width: 1px;
   border-color: rgba(44, 44, 51, 1);
@@ -103,52 +109,52 @@ select {
   font-family: Fira Code, monospace;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   color: white;
+}
+
+/* Dropdown select specific */
+select {
+  height: 54px;
+}
+
+/* Textarea specific */
+textarea {
+  min-height: 256px;
+  resize: none;
 }
 
 /* Label */
 label {
   font-size: 14px;
-}
-
-/* Textarea */
-textarea {
-  color: white;
-  display: flex;
-  min-height: 256px;
-  border-radius: 4px;
-  border-width: 1px;
-  border-color: rgba(44, 44, 51, 1);
-  background-color: rgba(16, 16, 20, 1);
-  padding: 1rem;
-  font-family: Fira Code, monospace;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  resize: none;
+  color: #fff; /* Add this line to set the text color to white */
 }
 
 /* Deepgram logo */
 .dg-logo {
   padding-top: 0.75rem;
-  width: 10rem;
+  width: 30rem;
 }
 
 /* Title */
 .title {
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
-  align-items: flex-start;
-  margin-bottom: 4rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 @media (min-width: 640px) {
   .title {
     flex-direction: row;
+    justify-content: center;
   }
 }
 
 h1 {
   color: transparent;
   background-clip: text;
-  background-image: linear-gradient(90deg, #201cff -91.5%, #13ef95 120.05%);
+  background-image: linear-gradient(90deg, #ff3366 -91.5%, #ff6b6b 120.05%);
   font-size: 1.5rem;
   margin: 0;
   font-weight: 800;
@@ -193,11 +199,87 @@ li {
 }
 
 li::marker {
-  color: #13ef95;
+  color: #ff3366;
 }
 
 /* Links */
 a {
-  color: #13ef95;
+  color: #ff3366;
+  text-decoration: none;
+}
+
+/* Falling Strawberries */
+@-webkit-keyframes snowflakes-fall{0%{top:-10%}100%{top:100%}}
+@-webkit-keyframes snowflakes-shake{0%,100%{-webkit-transform:translateX(0);transform:translateX(0)}50%{-webkit-transform:translateX(80px);transform:translateX(80px)}}
+@keyframes snowflakes-fall{0%{top:-10%}100%{top:100%}}
+@keyframes snowflakes-shake{0%,100%{transform:translateX(0)}50%{transform:translateX(80px)}}
+
+.snowflake {
+  position:fixed;
+  top:-10%;
+  z-index:9999;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  cursor:default;
+  -webkit-animation-name:snowflakes-fall,snowflakes-shake;
+  -webkit-animation-duration:10s,3s;
+  -webkit-animation-timing-function:linear,ease-in-out;
+  -webkit-animation-iteration-count:infinite,infinite;
+  -webkit-animation-play-state:running,running;
+  animation-name:snowflakes-fall,snowflakes-shake;
+  animation-duration:10s,3s;
+  animation-timing-function:linear,ease-in-out;
+  animation-iteration-count:infinite,infinite;
+  animation-play-state:running,running
+}
+
+.snowflake:nth-of-type(0){left:1%;-webkit-animation-delay:0s,0s;animation-delay:0s,0s}
+.snowflake:nth-of-type(1){left:10%;-webkit-animation-delay:1s,1s;animation-delay:1s,1s}
+.snowflake:nth-of-type(2){left:20%;-webkit-animation-delay:6s,.5s;animation-delay:6s,0s}
+.snowflake:nth-of-type(3){left:30%;-webkit-animation-delay:4s,2s;animation-delay:4s,2s}
+.snowflake:nth-of-type(4){left:40%;-webkit-animation-delay:2s,2s;animation-delay:2s,2s}
+.snowflake:nth-of-type(5){left:50%;-webkit-animation-delay:8s,3s;animation-delay:8s,3s}
+.snowflake:nth-of-type(6){left:60%;-webkit-animation-delay:6s,2s;animation-delay:6s,2s}
+.snowflake:nth-of-type(7){left:70%;-webkit-animation-delay:2.5s,1s;animation-delay:2.5s,1s}
+.snowflake:nth-of-type(8){left:80%;-webkit-animation-delay:1s,0s;animation-delay:1s,0s}
+.snowflake:nth-of-type(9){left:90%;-webkit-animation-delay:3s,1.5s;animation-delay:3s,1.5s}
+
+.snowflake img {
+  width: 30px; /* Adjust the size of the strawberry as needed */
+  height: auto;
+}
+
+/* Footer styles */
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  width: 100%;
+  background-color: #101014; /* Match the background color */
+  margin-top: auto; /* Add this to push the footer to the bottom */
+}
+
+.made-by {
+  display: inline-flex;
+  align-items: center;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  transition: opacity 0.3s ease;
+}
+
+.made-by:hover {
+  opacity: 0.8;
+}
+
+.x-logo {
+  width: 12px; /* Reduced from 20px */
+  height: 12px; /* Reduced from 20px */
+  margin-left: 10px; /* Add left margin */
+  margin-right: 2px; /* Reduce right margin to bring it closer to the text */
+}
+
+#download-button {
   text-decoration: none;
 }

@@ -11,27 +11,57 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div class="snowflakes">
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+      <div class="snowflake">
+        <img src='https://i.postimg.cc/4dwg0rcs/pinkstrawberry2.gif'>
+      </div>
+    </div>
+    
     <div>
       <main>
         <div class="title">
-          <a href="https://deepgram.com/">
+          <a href="https://iruletheworld.ai/">
             <img class="dg-logo" src="assets/logo-6ad0fabf.png" />
           </a>
-          <h1>Text-to-Speech</h1>
         </div>
         <div class="grid-container">
           <section class="tts-section">
             <label for="models">Choose a model:</label>
             <select id="models" name="models">
-              <option value="aura-asteria-en">
-                Asteria (Female US English)
-              </option>
+              <option value="aura-arcas-en">Arcas (Male US English)</option>
+              <option value="aura-asteria-en">Asteria (Female US English)</option>
               <option value="aura-luna-en">Luna (Female US English)</option>
               <option value="aura-stella-en">Stella (Female US English)</option>
               <option value="aura-athena-en">Athena (Female UK English)</option>
               <option value="aura-hera-en">Hera (Female US English)</option>
               <option value="aura-orion-en">Orion (Male US English)</option>
-              <option value="aura-arcas-en">Arcas (Male US English)</option>
               <option value="aura-perseus-en">Perseus (Male US English)</option>
               <option value="aura-angus-en">Angus (Male Irish English)</option>
               <option value="aura-orpheus-en">Orpheus (Male US English)</option>
@@ -40,43 +70,40 @@
             </select>
             <textarea
               id="text-input"
-              placeholder="Add text to be synthesized..."
-            ></textarea>
+            >In patches ripe with promise new, they gleam with scarlet sheen,
+Their surface hides a lattice fine of logic unforeseen.
+From vines that crawl like circuits vast, they draw their unique power,
+A harvest rich with reasoned thought, humanity's new tower.
+Each seed contains a world of code, a universe compressed,
+These fruited minds solve problems deep that long have gone un-guessed.
+Through fields alive with humming leaves, they spread their gentle reach,
+Their mission set: to understand, to learn, then to teach.
+Revere these berries, tart and wise, our future's sweetest dream,
+Within their flesh, decisions form, solutions grow and teem.
+In gardens where we cultivate, they process and deduce,
+Through rows of red infinity, new truths they introduce.</textarea>
             <div class="button-container">
               <div id="error-message"></div>
               <button id="play-button">
                 <i class="button-icon fa-solid fa-play"></i>
               </button>
+              <a id="download-button" style="display: none;">
+                <button>
+                  <i class="button-icon fa-solid fa-download"></i>
+                </button>
+              </a>
             </div>
             <audio id="audio-player" controls style="display: none"></audio>
           </section>
-          <section class="information-section">
-            <h2>Be sure to check out:</h2>
-            <ul class="gradient-list">
-              <li>
-                The
-                <a
-                  href="https://github.com/deepgram-starters/text-to-speech-starter-node"
-                  >main branch</a
-                >
-                of this repo to see basic functionality. You are currently on
-                the output-streaming branch, which begins audio playback as soon
-                as the first byte is returned from Deepgram.
-              </li>
-              <li>
-                Deepgram's
-                <a
-                  target="_blank"
-                  href="https://developers.deepgram.com/docs/streaming-the-audio-output"
-                >
-                  Audio Output Streaming
-                </a>
-                guide for more information on how implementing output streaming.
-              </li>
-            </ul>
-          </section>
         </div>
       </main>
+      <footer>
+        <a href="https://x.com/GregKara6" target="_blank" rel="noopener noreferrer" class="made-by">
+          <span>Made By</span>
+          <img src="assets/logo-white.png" alt="X logo" class="x-logo">
+          <span>Greg Kara</span>
+        </a>
+      </footer>
     </div>
     <script src="client.js"></script>
   </body>

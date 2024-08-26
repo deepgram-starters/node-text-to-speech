@@ -8,8 +8,8 @@ let playState = PLAY_STATES.NO_AUDIO;
 let audioPlayer;
 const textArea = document.getElementById("text-input");
 const errorMessage = document.querySelector("#error-message");
+let currentAudioBlob = null;
 
-// Function to update the play button based on the current state
 function updatePlayButton() {
   const playButton = document.getElementById("play-button");
   const icon = playButton.querySelector(".button-icon");
@@ -29,19 +29,16 @@ function updatePlayButton() {
   }
 }
 
-// Function to stop audio
 function stopAudio() {
-  audioPlayer = document.getElementById("audio-player");
   if (audioPlayer) {
-    playState = PLAY_STATES.PLAYING;
-    updatePlayButton();
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
-    audioPlayer = null;
   }
+  playState = PLAY_STATES.NO_AUDIO;
+  updatePlayButton();
+  document.getElementById('download-button').style.display = 'none';
 }
 
-// Function to handle the click event on the play button
 function playButtonClick() {
   switch (playState) {
     case PLAY_STATES.NO_AUDIO:
@@ -49,8 +46,6 @@ function playButtonClick() {
       break;
     case PLAY_STATES.PLAYING:
       stopAudio();
-      playState = PLAY_STATES.NO_AUDIO;
-      updatePlayButton();
       break;
     default:
       break;
@@ -61,7 +56,14 @@ textArea.addEventListener("input", () => {
   errorMessage.innerHTML = "";
 });
 
-// Function to send data to backend
+function createDownloadLink(blob) {
+  const downloadButton = document.getElementById('download-button');
+  const url = URL.createObjectURL(blob);
+  downloadButton.href = url;
+  downloadButton.download = 'audio.wav';
+  downloadButton.style.display = 'inline-block';
+}
+
 function sendData() {
   const modelSelect = document.getElementById("models");
   const selectedModel = modelSelect.options[modelSelect.selectedIndex].value;
@@ -87,38 +89,33 @@ function sendData() {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        playState = PLAY_STATES.PLAYING;
-        updatePlayButton();
-
-        // Check if there's an existing audio source and stop it
-        stopAudio();
-
-        // Create a Blob from the response data
         return response.blob();
       })
       .then((blob) => {
-        // Create an object URL from the Blob
+        currentAudioBlob = blob;
         const audioUrl = URL.createObjectURL(blob);
-
-        // Create an audio element and play the audio URL
-        const audioPlayer = document.getElementById("audio-player");
+        audioPlayer = document.getElementById("audio-player");
         audioPlayer.src = audioUrl;
+        
+        playState = PLAY_STATES.PLAYING;
+        updatePlayButton();
+
         audioPlayer.play();
 
         audioPlayer.addEventListener("ended", () => {
-          playState = PLAY_STATES.NO_AUDIO;
-          updatePlayButton();
+          stopAudio();
         });
+
+        createDownloadLink(blob);
       })
       .catch((error) => {
         console.error("Error fetching audio:", error);
-        playState = PLAY_STATES.NO_AUDIO;
-        updatePlayButton();
+        errorMessage.innerHTML = "Error fetching audio. Please try again.";
+        stopAudio();
       });
   }
 }
 
-// Event listener for the click event on the play button
 document
   .getElementById("play-button")
   .addEventListener("click", playButtonClick);

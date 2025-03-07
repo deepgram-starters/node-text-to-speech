@@ -1,4 +1,4 @@
-# Text-to-Speech Starter (Node.js)
+# Node Text-to-Speech Starter
 
 This example app demonstrates how to use the Deepgram Text-to-Speech API with Node.js.
 

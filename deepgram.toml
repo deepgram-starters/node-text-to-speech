@@ -1,6 +1,6 @@
 [meta]
-  title = "Text-to-speech Node.js Starter"
-  description = "This example app demonstrates how to use the Deepgram Text-to-Speech API with Node.js"
+  title = "Node Text-to-Speech Starter"
+  description = "Get started using Deepgram's Text-to-Speech with this Node demo app"
   author = "Deepgram DX Team <devrel@deepgram.com> (https://developers.deepgram.com)"
   useCase = "TTS"
   language = "JavaScript"

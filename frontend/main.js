@@ -25,9 +25,9 @@
 
 /**
  * API endpoint for text-to-speech requests
- * Change this if your backend is hosted elsewhere
+ * Contract-compliant endpoint per starter-contracts specification
  */
-const API_ENDPOINT = "/api";
+const API_ENDPOINT = "/tts/synthesize";
 
 /**
  * LocalStorage key for history persistence
@@ -71,6 +71,43 @@ let activeRequestId = null;
 // ============================================================================
 
 /**
+ * Converts a Blob to base64 string for storage in localStorage
+ * @param {Blob} blob - The blob to convert
+ * @returns {Promise<string>} Base64 string representation of the blob
+ */
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Remove data URL prefix (e.g., "data:audio/wav;base64,")
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Converts a base64 string back to a blob URL for playback
+ * @param {string} base64 - Base64 string representation of the audio
+ * @returns {string} Blob URL that can be used in audio elements
+ */
+function base64ToBlobUrl(base64) {
+  // Determine MIME type (default to audio/wav, but could be enhanced)
+  // For now, assume all audio is wav format from Deepgram
+  const mimeType = 'audio/wav';
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: mimeType });
+  return URL.createObjectURL(blob);
+}
+
+/**
  * Retrieves text-to-speech history from localStorage
  *
  * @returns {Array} Array of history entries, or empty array if none exist
@@ -81,7 +118,7 @@ let activeRequestId = null;
  *   timestamp: string,       // ISO 8601 timestamp
  *   text: string,            // Input text
  *   model: string,           // Model name used
- *   audioUrl: string,        // URL to generated audio file
+ *   audioBase64: string,     // Base64 encoded audio data (for persistence)
  *   response: object         // Full API response
  * }
  */
@@ -98,25 +135,30 @@ function getHistory() {
 /**
  * Saves a text-to-speech result to localStorage history
  *
- * @param {Object} responseData - The API response
+ * @param {Blob} audioBlob - The audio blob to save
  * @param {string} text - The input text
  * @param {string} model - Model name used for generation
- * @returns {Object|null} The saved history entry, or null if save failed
+ * @returns {Promise<Object|null>} The saved history entry, or null if save failed
  */
-function saveToHistory(responseData, text, model) {
+async function saveToHistory(audioBlob, text, model) {
   try {
     const history = getHistory();
 
     // Generate a fallback ID
     const requestId = `local_${Date.now()}`;
 
+    // Convert blob to base64 for storage
+    const audioBase64 = await blobToBase64(audioBlob);
+
     const historyEntry = {
       id: requestId,
       timestamp: new Date().toISOString(),
       text,
       model,
-      audioUrl: responseData.audioUrl,
-      response: responseData,
+      audioBase64: audioBase64,
+      response: {
+        audioBase64: audioBase64,
+      },
     };
 
     // Add to beginning of array (newest first)
@@ -214,10 +256,18 @@ function renderHistory() {
           ? entry.text.substring(0, 50) + "..." 
           : entry.text;
 
-        // Create audio element
-        const audioElement = entry.audioUrl 
+        // Create audio element - convert base64 to blob URL if needed
+        let audioUrl = null;
+        if (entry.audioBase64) {
+          audioUrl = base64ToBlobUrl(entry.audioBase64);
+        } else if (entry.audioUrl) {
+          // Legacy support for old entries that might have audioUrl
+          audioUrl = entry.audioUrl;
+        }
+        
+        const audioElement = audioUrl
           ? `<div class="history-item__audio">
-               <audio controls preload="metadata" src="${escapeHtml(entry.audioUrl)}">
+               <audio controls preload="metadata" src="${escapeHtml(audioUrl)}">
                  Your browser does not support the audio element.
                </audio>
              </div>`
@@ -256,9 +306,23 @@ function loadHistoryEntry(requestId) {
   // Set the active request ID
   activeRequestId = entry.id;
 
+  // Convert base64 to blob URL if needed
+  let audioUrl = null;
+  if (entry.audioBase64) {
+    audioUrl = base64ToBlobUrl(entry.audioBase64);
+  } else if (entry.audioUrl) {
+    // Legacy support for old entries that might have audioUrl
+    audioUrl = entry.audioUrl;
+  }
+
+  if (!audioUrl) {
+    showError("Audio data not found in history entry");
+    return;
+  }
+
   // Display the audio and text
-  displayAudio(entry.audioUrl, entry.text);
-  displayMetadata(entry.response, entry.text);
+  displayAudio(audioUrl, entry.text);
+  displayMetadata({ audioUrl }, entry.text);
   hideStatus();
 
   // Re-render history to update highlighting
@@ -412,15 +476,20 @@ async function handleGenerate() {
   showWorking();
 
   try {
+    // Build URL with model as query parameter (contract-compliant)
+    const url = new URL(API_ENDPOINT, window.location.origin);
+    if (model) {
+      url.searchParams.set("model", model);
+    }
+
     // Make API request with JSON body
-    const response = await fetch(API_ENDPOINT, {
+    const response = await fetch(url.toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         text,
-        model,
       }),
     });
 
@@ -429,29 +498,28 @@ async function handleGenerate() {
       throw new Error(errorData.error?.message || `Request failed with status ${response.status}`);
     }
 
-    const data = await response.json();
+    // Get binary audio data as blob
+    const audioBlob = await response.blob();
 
-    // Validate response matches contract (required: audioUrl field)
-    if (!data.audioUrl) {
-      throw new Error("Invalid response: missing required 'audioUrl' field");
-    }
+    // Create blob URL for the audio
+    const audioUrl = URL.createObjectURL(audioBlob);
 
-    // Save to history and get the entry
-    const historyEntry = saveToHistory(data, text, model);
+    // Save to history and get the entry (pass blob, not URL)
+    const historyEntry = await saveToHistory(audioBlob, text, model);
 
     // Set the active request ID and display
     if (historyEntry) {
       activeRequestId = historyEntry.id;
       enableFormElements();
-      displayAudio(data.audioUrl, text);
-      displayMetadata(data, text);
+      displayAudio(audioUrl, text);
+      displayMetadata({ audioUrl }, text);
       hideStatus();
       renderHistory(); // Re-render to highlight the active item
     } else {
       // Fallback: display directly if save failed
       enableFormElements();
-      displayAudio(data.audioUrl, text);
-      displayMetadata(data, text);
+      displayAudio(audioUrl, text);
+      displayMetadata({ audioUrl }, text);
       hideStatus();
     }
   } catch (error) {

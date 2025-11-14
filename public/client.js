@@ -86,26 +86,34 @@ function sendData() {
     playState = PLAY_STATES.LOADING;
     updatePlayButton();
 
-    const data = {
-      model: selectedModel,
-      text: textInput,
-    };
-    fetch("http://localhost:3000/api", {
+    // Build URL with model as query parameter (contract-compliant)
+    const url = new URL("/tts/synthesize", window.location.origin);
+    if (selectedModel) {
+      url.searchParams.set("model", selectedModel);
+    }
+
+    fetch(url.toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        text: textInput,
+      }),
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          return response.json().then((errorData) => {
+            throw new Error(errorData.error?.message || "Network response was not ok");
+          });
         }
-        return response.json();
+        return response.blob();
       })
-      .then((data) => {
-        console.log("Response received from server:", data);
-        playAudio(data.audioUrl);
+      .then((audioBlob) => {
+        // Create blob URL for the audio
+        const audioUrl = URL.createObjectURL(audioBlob);
+        console.log("Response received from server:", { audioUrl });
+        playAudio(audioUrl);
         playState = PLAY_STATES.PLAYING;
         updatePlayButton();
       })

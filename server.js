@@ -6,9 +6,9 @@
  * modified and extended for your own projects.
  *
  * Key Features:
- * - Single API endpoint: POST /api
- * - Accepts text and model parameters
- * - Generates audio files and returns URLs
+ * - Contract-compliant API endpoint: POST /tts/synthesize
+ * - Accepts text in body and model as query parameter
+ * - Returns binary audio data (application/octet-stream)
  * - Proxies to Vite dev server in development
  * - Serves static frontend in production
  */
@@ -193,18 +193,37 @@ async function saveAudioFile(audioBuffer, filename = null) {
 }
 
 /**
- * Formats error responses in a consistent structure
+ * Formats error responses in a consistent structure matching the contract
  * @param {Error} error - The error that occurred
  * @param {number} statusCode - HTTP status code to return
+ * @param {string} errorCode - Contract error code (EMPTY_TEXT, INVALID_TEXT, TEXT_TOO_LONG, MODEL_NOT_FOUND)
  * @returns {Object} - Formatted error response
  */
-function formatErrorResponse(error, statusCode = 500) {
+function formatErrorResponse(error, statusCode = 500, errorCode = null) {
+  // Map status codes and error messages to contract error codes
+  let contractCode = errorCode;
+  if (!contractCode) {
+    if (statusCode === 400) {
+      if (error.message && error.message.toLowerCase().includes("empty")) {
+        contractCode = "EMPTY_TEXT";
+      } else if (error.message && error.message.toLowerCase().includes("model")) {
+        contractCode = "MODEL_NOT_FOUND";
+      } else if (error.message && error.message.toLowerCase().includes("long")) {
+        contractCode = "TEXT_TOO_LONG";
+      } else {
+        contractCode = "INVALID_TEXT";
+      }
+    } else {
+      contractCode = "INVALID_TEXT"; // Default for other errors
+    }
+  }
+
   return {
     statusCode,
     body: {
       error: {
         type: statusCode === 400 ? "ValidationError" : "GenerationError",
-        code: statusCode === 400 ? "MISSING_INPUT" : "GENERATION_FAILED",
+        code: contractCode,
         message: error.message || "An error occurred during audio generation",
         details: {
           originalError: error.toString(),
@@ -219,50 +238,88 @@ function formatErrorResponse(error, statusCode = 500) {
 // ============================================================================
 
 /**
- * POST /api
+ * POST /tts/synthesize
  *
- * Main text-to-speech endpoint. Accepts:
- * - text: The text to convert to speech (required)
- * - model: Deepgram model to use (optional, default: "aura-2-thalia-en")
+ * Contract-compliant text-to-speech endpoint per starter-contracts specification.
+ * Accepts:
+ * - Query parameter: model (optional)
+ * - Header: X-Request-Id (optional, echoed back)
+ * - Body: JSON with text field (required)
  *
  * Returns:
- * - audioUrl: URL path to the generated audio file
+ * - Success (200): Binary audio data (application/octet-stream)
+ * - Error (4XX): JSON error response matching contract format
  *
- * CUSTOMIZATION TIPS:
- * - Add more Deepgram TTS features like SSML, encoding options, etc. in the
- *   generateAudio() function by adding options to the API call
- * - Modify saveAudioFile() to use different file formats or storage backends
- * - Add authentication middleware here if you want to protect this endpoint
- * - Add rate limiting to prevent abuse
+ * This endpoint implements the TTS contract specification.
  */
-app.post("/api", async (req, res) => {
+app.post("/tts/synthesize", async (req, res) => {
+  // Echo X-Request-Id header if provided
+  const requestId = req.headers["x-request-id"];
+  if (requestId) {
+    res.setHeader("X-Request-Id", requestId);
+  }
+
   try {
-    const { text, model } = req.body;
+    // Get model from query parameter (contract specifies query param, not body)
+    const model = req.query.model || DEFAULT_MODEL;
+    const { text } = req.body;
 
     // Validate input - text is required
+    if (!text) {
+      const errorResponse = formatErrorResponse(
+        new Error("Text parameter is required"),
+        400,
+        "EMPTY_TEXT"
+      );
+      return res.status(errorResponse.statusCode).json(errorResponse.body);
+    }
+
     if (!validateTextInput(text)) {
       const errorResponse = formatErrorResponse(
-        new Error("Text parameter is required and must be a non-empty string"),
-        400
+        new Error("Text must be a non-empty string"),
+        400,
+        "EMPTY_TEXT"
       );
       return res.status(errorResponse.statusCode).json(errorResponse.body);
     }
 
     // Generate audio from text
-    const audioBuffer = await generateAudio(text, model || DEFAULT_MODEL);
+    const audioBuffer = await generateAudio(text, model);
 
-    // Save audio to file
-    const audioUrl = await saveAudioFile(audioBuffer);
-
-    // Return response with audio URL
-    res.json({
-      audioUrl,
-    });
+    // Return binary audio data (contract requires application/octet-stream)
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.send(audioBuffer);
   } catch (err) {
     console.error("Text-to-speech error:", err);
 
-    // Return formatted error response
-    const errorResponse = formatErrorResponse(err);
+    // Determine error type and status code based on error message
+    let statusCode = 500;
+    let errorCode = null;
+    const errorMsg = err.message ? err.message.toLowerCase() : "";
+
+    // Check for model-related errors
+    if (errorMsg.includes("model") || errorMsg.includes("not found")) {
+      statusCode = 400;
+      errorCode = "MODEL_NOT_FOUND";
+    }
+    // Check for text length errors (common patterns from Deepgram API)
+    else if (errorMsg.includes("too long") || errorMsg.includes("length") || errorMsg.includes("limit") || errorMsg.includes("exceed")) {
+      statusCode = 400;
+      errorCode = "TEXT_TOO_LONG";
+    }
+    // Check for invalid text errors
+    else if (errorMsg.includes("invalid") || errorMsg.includes("malformed")) {
+      statusCode = 400;
+      errorCode = "INVALID_TEXT";
+    }
+    // For validation errors, use 400
+    else if (err.statusCode === 400 || err.status === 400) {
+      statusCode = 400;
+      errorCode = "INVALID_TEXT";
+    }
+
+    // Return formatted error response matching contract
+    const errorResponse = formatErrorResponse(err, statusCode, errorCode);
     res.status(errorResponse.statusCode).json(errorResponse.body);
   }
 });

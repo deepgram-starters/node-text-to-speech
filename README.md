@@ -44,7 +44,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Features
 
-- Enter Text to convert to audio
+- Enter text to convert to audio
 - Multiple model options
 - View text-to-speech history
 

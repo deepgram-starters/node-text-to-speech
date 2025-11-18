@@ -61,10 +61,6 @@ Open [http://localhost:3000](http://localhost:3000)
 - **Frontend** (`frontend/`): Vite-powered web UI for audio upload and transcription display
 - **API**: Integrates with [Deepgram's Speech-Text-to-Speech API](https://developers.deepgram.com/)
 
-## Customization
-
-TODO
-
 ## Getting Help
 
 - [Open an issue](https://github.com/deepgram-starters/live-node-starter/issues/new)

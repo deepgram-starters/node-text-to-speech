@@ -48,13 +48,6 @@ Open [http://localhost:3000](http://localhost:3000)
 - Multiple model options
 - View text-to-speech history
 
-## Scripts
-
-- `pnpm install` - Install backend and frontend dependencies
-- `pnpm dev` - Run in development mode with hot reload
-- `pnpm build` - Build frontend for production
-- `pnpm start` - Start production server (serves built frontend)
-
 ## How It Works
 
 - **Backend** (`server.js`): Node.js/Express server implementing the `/tts/synthesize` endpoint

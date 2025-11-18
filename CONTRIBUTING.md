@@ -1,50 +1,53 @@
 # Contributing Guidelines
 
-Want to contribute to this project? We ❤️ it!
+We welcome contributions! Before adding new functionality, open an issue first. Bug reports, fixes, and feedback are always appreciated.
 
-Here are a few types of contributions that we would be interested in hearing about.
+Please take the time to review the [Code of Conduct](CODE_OF_CONDUCT.md), which all contributors are subject to on this project.
 
-* Bug fixes
-  * If you find a bug, please first report it using Github Issues.
-  * Issues that have already been identified as a bug will be labeled `bug`.
-    * If you'd like to submit a fix for a bug, send a Pull Request from your own fork and mention the Issue number.
-      * Include a test that isolates the bug and verifies that it was fixed.
-* New Features
-  * If you'd like to accomplish something in the extension that it doesn't already do, describe the problem in a new Github Issue.
-    * Issues that have been identified as a feature request will be labeled `enhancement`.
-    * If you'd like to implement the new feature, please wait for feedback from the project maintainers before spending
-      too much time writing the code. In some cases, `enhancement`s may not align well with the project objectives at
-      the time.
-* Tests, Documentation, Miscellaneous
-  * If you think the test coverage could be improved, the documentation could be clearer, you've got an alternative
-    implementation of something that may have more advantages, or any other change we would still be glad hear about
-    it.
-    * If its a trivial change, go ahead and send a Pull Request with the changes you have in mind
-    * If not, open a Github Issue to discuss the idea first.
-* Snippets
-  * To add snippets:
-    * Add a directory in the `snippets` folder with the name of the language.
-    * Add one or more files in the language directory with snippets.
-    * Update the `package.json` to include the snippets you added.
+## Reporting Bugs
 
-We also welcome anyone to work on any existing issues with the `good first issue` tag.
+Before submitting a bug report:
+- Search existing issues and comment if one exists instead of creating a duplicate.
 
-## Requirements
+When submitting a bug report:
+- Use a clear title
+- List exact steps to reproduce the issue
+- Provide examples, links, or code snippets
+- Describe observed vs. expected behavior
+- Include screenshots or GIFs
+  - For macOS and Windows: [LICEcap](https://www.cockos.com/licecap/)
+  - For Linux: [Silentcast](https://github.com/colinkeenan/silentcast)
+- Mention if the issue is consistent or intermittent and share environment details
 
-For a contribution to be accepted:
+## Suggesting Enhancements
 
-* The test suite must be complete and pass
-* Code must follow existing styling conventions
-* Commit messages must be descriptive. Related issues should be mentioned by number.
+Before submitting an enhancement:
+- Search existing suggestions and comment on one instead of creating a duplicate.
 
-If the contribution doesn't meet these criteria, a maintainer will discuss it with you on the Issue. You can still
-continue to add more commits to the branch you have sent the Pull Request from.
+When submitting an enhancement:
+- Use a clear title
+- Describe the enhancement step-by-step
+- Provide examples or code snippets
+- Explain current vs. expected behavior and its benefits
 
-## How To
+## First Time Contributors
 
-1. Fork this repository on GitHub.
-1. Clone/fetch your fork to your local development machine.
-1. Create a new branch (e.g. `issue-12`, `feat.add_foo`, etc) and check it out.
-1. Make your changes and commit them. (Did the tests pass? No linting errors?)
-1. Push your new branch to your fork. (e.g. `git push myname issue-12`)
-1. Open a Pull Request from your new branch to the original fork's `main` branch.
+Check `beginner` and `help-wanted` issues to get started.
+
+## Pull Requests
+
+Please follow these steps:
+1. Use the Pull Request template
+2. Follow the [Code of Conduct](CODE_OF_CONDUCT.md)
+3. Ensure all [status checks](https://help.github.com/articles/about-status-checks/) pass before review
+
+Note: Reviewers may request additional changes before merging.
+
+## Questions?
+
+Connect with us through any of these channels:
+- [GitHub Discussions](https://github.com/orgs/deepgram/discussions)
+- [Discord](https://discord.gg/deepgram)
+- [Bluesky](https://bsky.app/profile/deepgram.com)
+
+For additional guidance, check out [GitHub Flow](https://guides.github.com/introduction/flow/index.html).

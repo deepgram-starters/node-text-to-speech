@@ -60,6 +60,18 @@ Open [http://localhost:3000](http://localhost:3000)
 - [Join our Discord](https://discord.gg/xWRaCDBtW4)
 - [Deepgram Documentation](https://developers.deepgram.com/)
 
+## Contributing
+
+See our [Contributing Guidelines](./CONTRIBUTING.md) to learn about contributing to this project.
+
+## Code of Conduct
+
+This project follows the [Deepgram Code of Conduct](./CODE_OF_CONDUCT.md).
+
+## Security
+
+For security policy and procedures, see our [Security Policy](./SECURITY.md).
+
 ## License
 
 MIT - See [LICENSE](./LICENSE)

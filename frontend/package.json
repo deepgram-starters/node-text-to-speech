@@ -1,41 +1,41 @@
 {
-    "name": "@deepgram/text-to-speech-html",
-    "version": "0.0.1",
-    "private": true,
-    "description": "Minimal HTML starter with Deepgram design system styles",
-    "main": "index.html",
-    "type": "module",
-    "scripts": {
-      "dev": "vite",
-      "build": "vite build",
-      "preview": "vite preview"
-    },
-    "keywords": [
-      "deepgram",
-      "text-to-speech",
-      "html",
-      "javascript",
-      "css"
-    ],
-    "author": "Deepgram Starter UIs Team",
-    "license": "MIT",
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/deepgram-starters/node-text-to-speech.git",
-      "directory": "frontend"
-    },
-    "engines": {
-      "node": ">=14.0.0"
-    },
-    "browserslist": [
-      "defaults",
-      "not ie 11",
-      "not op_mini all"
-    ],
-    "dependencies": {
-      "@deepgram/styles": "latest"
-    },
-    "devDependencies": {
-      "vite": "^7.2.2"
-    }
+  "name": "@deepgram/text-to-speech-html",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Minimal HTML starter with Deepgram design system styles",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "deepgram",
+    "text-to-speech",
+    "html",
+    "javascript",
+    "css"
+  ],
+  "author": "Deepgram Starter UIs Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deepgram-starters/node-text-to-speech.git",
+    "directory": "frontend"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "defaults",
+    "not ie 11",
+    "not op_mini all"
+  ],
+  "dependencies": {
+    "@deepgram/styles": "latest"
+  },
+  "devDependencies": {
+    "vite": "^7.2.2"
   }
+}

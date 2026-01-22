@@ -15,7 +15,7 @@
 
 require("dotenv").config();
 
-const { createClient } = require("@deepgram/sdk");
+const { DeepgramClient } = require("@deepgram/sdk");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const express = require("express");
 const fs = require("fs");
@@ -89,7 +89,7 @@ const apiKey = loadApiKey();
 // ============================================================================
 
 // Initialize Deepgram client
-const deepgram = createClient(apiKey);
+const deepgram = new DeepgramClient({ apiKey });
 
 // Initialize Express app
 const app = express();
@@ -150,15 +150,17 @@ async function streamToBuffer(stream) {
  */
 async function generateAudio(text, model = DEFAULT_MODEL) {
   try {
-    const response = await deepgram.speak.request({ text }, { model });
-    const stream = await response.getStream();
+    // In v5, use the new API structure
+    const response = await deepgram.speak.v1.audio.generate({
+      text,
+      model,
+      encoding: "linear16",
+      container: "wav"
+    });
 
-    if (!stream) {
-      throw new Error("No audio stream returned from Deepgram");
-    }
-
-    const buffer = await streamToBuffer(stream);
-    return buffer;
+    // v5 SDK returns BinaryResponse directly with methods: stream(), arrayBuffer(), blob(), bytes()
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
   } catch (error) {
     console.error("Error generating audio:", error);
     throw new Error(`Failed to generate audio: ${error.message}`);

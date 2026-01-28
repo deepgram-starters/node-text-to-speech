@@ -97,15 +97,6 @@ const app = express();
 // Middleware for parsing JSON request bodies
 app.use(express.json());
 
-// Ensure audio directory exists
-const audioDirectory = path.join(__dirname, "audio");
-if (!fs.existsSync(audioDirectory)) {
-  fs.mkdirSync(audioDirectory, { recursive: true });
-}
-
-// Serve audio files statically
-app.use("/audio", express.static(audioDirectory));
-
 // ============================================================================
 // HELPER FUNCTIONS - Modular logic for easier understanding and testing
 // ============================================================================
@@ -162,33 +153,6 @@ async function generateAudio(text, model = DEFAULT_MODEL) {
   } catch (error) {
     console.error("Error generating audio:", error);
     throw new Error(`Failed to generate audio: ${error.message}`);
-  }
-}
-
-/**
- * Saves audio buffer to a file and returns the URL
- * @param {Buffer} audioBuffer - The audio data to save
- * @param {string} filename - Optional filename (defaults to timestamped name)
- * @returns {Promise<string>} - The URL path to the saved audio file
- */
-async function saveAudioFile(audioBuffer, filename = null) {
-  try {
-    // Generate filename if not provided
-    if (!filename) {
-      const timestamp = Date.now();
-      filename = `audio-${timestamp}.wav`;
-    }
-
-    const filePath = path.join(audioDirectory, filename);
-
-    // Write file
-    await fs.promises.writeFile(filePath, audioBuffer);
-
-    // Return URL path
-    return `/audio/${filename}`;
-  } catch (error) {
-    console.error("Error saving audio file:", error);
-    throw new Error(`Failed to save audio file: ${error.message}`);
   }
 }
 

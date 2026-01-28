@@ -18,7 +18,6 @@ require("dotenv").config();
 const { createClient } = require("@deepgram/sdk");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
 
 // ============================================================================

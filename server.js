@@ -18,7 +18,6 @@ require("dotenv").config();
 const { createClient } = require("@deepgram/sdk");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
 
 // ============================================================================
@@ -36,9 +35,9 @@ const DEFAULT_MODEL = "aura-2-thalia-en";
  * Server configuration - These can be overridden via environment variables
  */
 const CONFIG = {
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 8080,
   host: process.env.HOST || "0.0.0.0",
-  vitePort: process.env.VITE_PORT || 8081,
+  vitePort: process.env.VITE_PORT || 5173,
   isDevelopment: process.env.NODE_ENV === "development",
 };
 
@@ -97,15 +96,6 @@ const app = express();
 // Middleware for parsing JSON request bodies
 app.use(express.json());
 
-// Ensure audio directory exists
-const audioDirectory = path.join(__dirname, "audio");
-if (!fs.existsSync(audioDirectory)) {
-  fs.mkdirSync(audioDirectory, { recursive: true });
-}
-
-// Serve audio files statically
-app.use("/audio", express.static(audioDirectory));
-
 // ============================================================================
 // HELPER FUNCTIONS - Modular logic for easier understanding and testing
 // ============================================================================
@@ -162,33 +152,6 @@ async function generateAudio(text, model = DEFAULT_MODEL) {
   } catch (error) {
     console.error("Error generating audio:", error);
     throw new Error(`Failed to generate audio: ${error.message}`);
-  }
-}
-
-/**
- * Saves audio buffer to a file and returns the URL
- * @param {Buffer} audioBuffer - The audio data to save
- * @param {string} filename - Optional filename (defaults to timestamped name)
- * @returns {Promise<string>} - The URL path to the saved audio file
- */
-async function saveAudioFile(audioBuffer, filename = null) {
-  try {
-    // Generate filename if not provided
-    if (!filename) {
-      const timestamp = Date.now();
-      filename = `audio-${timestamp}.wav`;
-    }
-
-    const filePath = path.join(audioDirectory, filename);
-
-    // Write file
-    await fs.promises.writeFile(filePath, audioBuffer);
-
-    // Return URL path
-    return `/audio/${filename}`;
-  } catch (error) {
-    console.error("Error saving audio file:", error);
-    throw new Error(`Failed to save audio file: ${error.message}`);
   }
 }
 
@@ -286,8 +249,8 @@ app.post("/tts/synthesize", async (req, res) => {
     // Generate audio from text
     const audioBuffer = await generateAudio(text, model);
 
-    // Return binary audio data (contract requires application/octet-stream)
-    res.setHeader("Content-Type", "application/octet-stream");
+    // Return binary audio data with proper audio mime type
+    res.setHeader("Content-Type", "audio/mpeg");
     res.send(audioBuffer);
   } catch (err) {
     console.error("Text-to-speech error:", err);
@@ -345,17 +308,21 @@ app.post("/tts/synthesize", async (req, res) => {
  * IMPORTANT: This MUST come AFTER your API routes to avoid conflicts
  */
 if (CONFIG.isDevelopment) {
-  // Development: Proxy to Vite dev server
+  console.log(`Development mode: Proxying to Vite dev server on port ${CONFIG.vitePort}`);
+
+  // Proxy all requests (including WebSocket for Vite HMR) to Vite dev server
+  // Note: This app has no backend WebSocket connections, so we can proxy all WebSockets to Vite
   app.use(
     "/",
     createProxyMiddleware({
       target: `http://localhost:${CONFIG.vitePort}`,
       changeOrigin: true,
-      ws: true, // Enable WebSocket proxying for Vite HMR (Hot Module Reload)
+      ws: true, // All WebSockets go to Vite (no backend WebSocket endpoints)
     })
   );
 } else {
-  // Production: Serve static files from frontend/dist
+  console.log('Production mode: Serving static files');
+
   const distPath = path.join(__dirname, "frontend", "dist");
   app.use(express.static(distPath));
 }

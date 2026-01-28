@@ -65,6 +65,20 @@ pnpm start
 - Multiple model options
 - View text-to-speech history
 
+## Architecture
+
+### Backend
+- **Stateless API**: Returns audio directly, no file storage
+- Express server with single endpoint: `/tts/synthesize`
+- Proxies to Vite dev server in development mode
+
+### Frontend
+- **Hybrid Storage**:
+  - IndexedDB for audio blobs (efficient binary storage)
+  - localStorage for metadata (fast UI rendering)
+- Pure vanilla JavaScript (no frameworks)
+- Deepgram Design System for styling
+
 ## How It Works
 
 - **Backend** (`server.js`): Node.js/Express server implementing the `/tts/synthesize` endpoint

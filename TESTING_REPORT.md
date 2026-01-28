@@ -79,12 +79,12 @@ Navigate to: **http://localhost:8080**
 1. Open DevTools (F12 or Cmd+Option+I on Mac)
 2. Navigate to: **Application** tab → **Storage** → **IndexedDB**
 3. Expand **deepgram-tts-audio** database
-4. Click on **audio-samples** object store
+4. Click on **audio-blobs** object store
 5. Inspect stored records
 
 **Success Criteria:**
 - ✅ Database named `deepgram-tts-audio` exists
-- ✅ Object store named `audio-samples` exists
+- ✅ Object store named `audio-blobs` exists
 - ✅ Each record has:
   - `id` (string, matches history item IDs)
   - `audioBlob` (Blob object, NOT base64 string)
@@ -94,7 +94,7 @@ Navigate to: **http://localhost:8080**
 **Visual Example:**
 ```
 deepgram-tts-audio
-└── audio-samples
+└── audio-blobs
     ├── abc123 → { id: "abc123", audioBlob: Blob(12345 bytes), timestamp: 1738099200000 }
     ├── def456 → { id: "def456", audioBlob: Blob(23456 bytes), timestamp: 1738099260000 }
     └── ghi789 → { id: "ghi789", audioBlob: Blob(34567 bytes), timestamp: 1738099320000 }
@@ -336,7 +336,7 @@ If tests fail:
 ### Key Constants
 - `MAX_HISTORY_ENTRIES = 5` (configurable in `/frontend/js/config.js`)
 - IndexedDB name: `deepgram-tts-audio`
-- Object store: `audio-samples`
+- Object store: `audio-blobs`
 - localStorage key: `deepgram_text_to_speech_history`
 
 ---

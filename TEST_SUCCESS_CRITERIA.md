@@ -3,7 +3,7 @@
 ## What You Should See When Tests Pass
 
 ### 1. IndexedDB Inspector
-**Path:** DevTools → Application → IndexedDB → deepgram-tts-audio → audio-samples
+**Path:** DevTools → Application → IndexedDB → deepgram-tts-audio → audio-blobs
 
 **✅ SUCCESS:**
 ```

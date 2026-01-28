@@ -249,8 +249,8 @@ app.post("/tts/synthesize", async (req, res) => {
     // Generate audio from text
     const audioBuffer = await generateAudio(text, model);
 
-    // Return binary audio data (contract requires application/octet-stream)
-    res.setHeader("Content-Type", "application/octet-stream");
+    // Return binary audio data with proper audio mime type
+    res.setHeader("Content-Type", "audio/mpeg");
     res.send(audioBuffer);
   } catch (err) {
     console.error("Text-to-speech error:", err);

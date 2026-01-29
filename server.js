@@ -37,7 +37,7 @@ const DEFAULT_MODEL = "aura-2-thalia-en";
 const CONFIG = {
   port: process.env.PORT || 8080,
   host: process.env.HOST || "0.0.0.0",
-  vitePort: process.env.VITE_PORT || 5173,
+  vitePort: process.env.VITE_PORT || 8081,
   isDevelopment: process.env.NODE_ENV === "development",
 };
 
@@ -285,6 +285,22 @@ app.post("/tts/synthesize", async (req, res) => {
     const errorResponse = formatErrorResponse(err, statusCode, errorCode);
     res.status(errorResponse.statusCode).json(errorResponse.body);
   }
+});
+
+/**
+ * GET /api/metadata
+ *
+ * Returns metadata about this starter application
+ * Required for standardization compliance
+ */
+app.get("/api/metadata", (req, res) => {
+  res.json({
+    name: "Node Text-to-Speech Starter",
+    feature: "text-to-speech",
+    language: "JavaScript",
+    framework: "Node",
+    version: "1.0.0"
+  });
 });
 
 /**

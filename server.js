@@ -214,7 +214,6 @@ function formatErrorResponse(error, statusCode = 500, errorCode = null) {
  * Contract-compliant text-to-speech endpoint per starter-contracts specification.
  * Accepts:
  * - Query parameter: model (optional)
- * - Header: X-Request-Id (optional, echoed back)
  * - Body: JSON with text field (required)
  *
  * Returns:
@@ -224,12 +223,6 @@ function formatErrorResponse(error, statusCode = 500, errorCode = null) {
  * This endpoint implements the TTS contract specification.
  */
 app.post("/tts/synthesize", async (req, res) => {
-  // Echo X-Request-Id header if provided
-  const requestId = req.headers["x-request-id"];
-  if (requestId) {
-    res.setHeader("X-Request-Id", requestId);
-  }
-
   try {
     // Get model from query parameter (contract specifies query param, not body)
     const model = req.query.model || DEFAULT_MODEL;

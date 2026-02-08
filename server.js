@@ -6,7 +6,7 @@
  * modified and extended for your own projects.
  *
  * Key Features:
- * - Contract-compliant API endpoint: POST /tts/synthesize
+ * - Contract-compliant API endpoint: POST /api/text-to-speech
  * - Accepts text in body and model as query parameter
  * - Returns binary audio data (application/octet-stream)
  * - Proxies to Vite dev server in development
@@ -37,7 +37,6 @@ const DEFAULT_MODEL = "aura-2-thalia-en";
 const CONFIG = {
   port: process.env.PORT || 8081,
   host: process.env.HOST || "0.0.0.0",
-  frontendPort: process.env.FRONTEND_PORT || 8080,
 };
 
 // ============================================================================
@@ -95,14 +94,8 @@ const app = express();
 // Middleware for parsing JSON request bodies
 app.use(express.json());
 
-// Enable CORS for frontend
-app.use(cors({
-  origin: [
-    `http://localhost:${CONFIG.frontendPort}`,
-    `http://127.0.0.1:${CONFIG.frontendPort}`
-  ],
-  credentials: true
-}));
+// Enable CORS (wildcard is safe -- same-origin via Vite proxy / Caddy in production)
+app.use(cors());
 
 // ============================================================================
 // HELPER FUNCTIONS - Modular logic for easier understanding and testing
@@ -209,7 +202,7 @@ function formatErrorResponse(error, statusCode = 500, errorCode = null) {
 // ============================================================================
 
 /**
- * POST /tts/synthesize
+ * POST /api/text-to-speech
  *
  * Contract-compliant text-to-speech endpoint per starter-contracts specification.
  * Accepts:
@@ -222,7 +215,7 @@ function formatErrorResponse(error, statusCode = 500, errorCode = null) {
  *
  * This endpoint implements the TTS contract specification.
  */
-app.post("/tts/synthesize", async (req, res) => {
+app.post("/api/text-to-speech", async (req, res) => {
   try {
     // Get model from query parameter (contract specifies query param, not body)
     const model = req.query.model || DEFAULT_MODEL;
@@ -337,8 +330,8 @@ app.get("/api/metadata", (req, res) => {
 app.listen(CONFIG.port, CONFIG.host, () => {
   console.log("\n" + "=".repeat(70));
   console.log(`🚀 Backend API Server running at http://localhost:${CONFIG.port}`);
-  console.log(`📡 CORS enabled for http://localhost:${CONFIG.frontendPort}`);
   console.log("");
-  console.log(`💡 Frontend should be running on http://localhost:${CONFIG.frontendPort}`);
+  console.log(`📡 POST /api/text-to-speech`);
+  console.log(`📡 GET  /api/metadata`);
   console.log("=".repeat(70) + "\n");
 });

@@ -10,7 +10,7 @@
  * - Accepts text in body and model as query parameter
  * - Returns binary audio data (application/octet-stream)
  * - CORS enabled for frontend communication
- * - JWT session auth with page nonce (production only)
+ * - JWT session auth with rate limiting (production only)
  * - Pure API server (frontend served separately)
  */
 
@@ -44,69 +44,17 @@ const CONFIG = {
 };
 
 // ============================================================================
-// SESSION AUTH - JWT tokens with page nonce for production security
+// SESSION AUTH - JWT tokens for production security
 // ============================================================================
 
 /**
- * Session secret for signing JWTs. When set (production/Fly.io), nonce
- * validation is enforced. When unset (local dev), tokens are issued freely.
+ * Session secret for signing JWTs.
  */
 const SESSION_SECRET =
   process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex");
-const REQUIRE_NONCE = !!process.env.SESSION_SECRET;
-
-/** In-memory nonce store: nonce → expiry timestamp */
-const sessionNonces = new Map();
-
-/** Nonce expiry time (5 minutes) */
-const NONCE_TTL_MS = 5 * 60 * 1000;
 
 /** JWT expiry time (1 hour) */
 const JWT_EXPIRY = "1h";
-
-/**
- * Generates a single-use nonce and stores it with an expiry
- * @returns {string} The generated nonce
- */
-function generateNonce() {
-  const nonce = crypto.randomBytes(16).toString("hex");
-  sessionNonces.set(nonce, Date.now() + NONCE_TTL_MS);
-  return nonce;
-}
-
-/**
- * Validates and consumes a nonce (single-use)
- * @param {string} nonce - The nonce to validate
- * @returns {boolean} True if the nonce was valid and consumed
- */
-function consumeNonce(nonce) {
-  const expiry = sessionNonces.get(nonce);
-  if (!expiry) return false;
-  sessionNonces.delete(nonce);
-  return Date.now() < expiry;
-}
-
-/** Periodically clean up expired nonces (every 60 seconds) */
-setInterval(() => {
-  const now = Date.now();
-  for (const [nonce, expiry] of sessionNonces) {
-    if (now >= expiry) sessionNonces.delete(nonce);
-  }
-}, 60_000);
-
-/**
- * Reads frontend/dist/index.html and injects a session nonce meta tag.
- * Returns null in dev mode (no built frontend).
- */
-let indexHtmlTemplate = null;
-try {
-  indexHtmlTemplate = fs.readFileSync(
-    path.join(__dirname, "frontend", "dist", "index.html"),
-    "utf-8"
-  );
-} catch {
-  // No built frontend (dev mode) — index.html served by Vite
-}
 
 /**
  * Express middleware that validates JWT from Authorization header.
@@ -305,42 +253,14 @@ function formatErrorResponse(error, statusCode = 500, errorCode = null) {
 // ============================================================================
 
 /**
- * GET / — Serve index.html with injected session nonce (production only).
- * In dev mode, Vite serves the frontend directly.
- */
-app.get("/", (req, res) => {
-  if (!indexHtmlTemplate) {
-    return res.status(404).send("Frontend not built. Run make build first.");
-  }
-  const nonce = generateNonce();
-  const html = indexHtmlTemplate.replace(
-    "</head>",
-    `<meta name="session-nonce" content="${nonce}">\n</head>`
-  );
-  res.type("html").send(html);
-});
-
-/**
- * GET /api/session — Issues a JWT. In production (SESSION_SECRET set),
- * requires a valid single-use nonce via X-Session-Nonce header.
+ * GET /api/session — Issues a signed JWT for session authentication.
  */
 app.get("/api/session", (req, res) => {
-  if (REQUIRE_NONCE) {
-    const nonce = req.headers["x-session-nonce"];
-    if (!nonce || !consumeNonce(nonce)) {
-      return res.status(403).json({
-        error: {
-          type: "AuthenticationError",
-          code: "INVALID_NONCE",
-          message: "Valid session nonce required. Please refresh the page.",
-        },
-      });
-    }
-  }
-
-  const token = jwt.sign({ iat: Math.floor(Date.now() / 1000) }, SESSION_SECRET, {
-    expiresIn: JWT_EXPIRY,
-  });
+  const token = jwt.sign(
+    { iat: Math.floor(Date.now() / 1000) },
+    SESSION_SECRET,
+    { expiresIn: JWT_EXPIRY }
+  );
   res.json({ token });
 });
 
@@ -478,7 +398,7 @@ app.get("/api/metadata", (req, res) => {
 app.listen(CONFIG.port, CONFIG.host, () => {
   console.log("\n" + "=".repeat(70));
   console.log(`🚀 Backend API running at http://localhost:${CONFIG.port}`);
-  console.log(`📡 GET  /api/session${REQUIRE_NONCE ? " (nonce required)" : ""}`);
+  console.log(`📡 GET  /api/session`);
   console.log(`📡 POST /api/text-to-speech (auth required)`);
   console.log(`📡 GET  /api/metadata`);
   console.log("=".repeat(70) + "\n");
